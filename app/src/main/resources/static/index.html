@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <head>
+        <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+        <script src="elarian.js"></script>
+        <title>Banki ATM</title>
+    </head>
+</head>
+<body>
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <img class="mx-auto h-12 w-auto" src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg" alt="Workflow">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Banki ATM
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+            Or
+            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                just dial *777#
+            </a>
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form class="space-y-6" action="#" method="POST">
+                <div>
+                    <label for="account" class="block text-sm font-medium text-gray-700">
+                        Account Number
+                    </label>
+                    <div class="mt-1">
+                        <input id="account" name="balance" type="number" value="12343424444432" disabled class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="balance" class="block text-sm font-medium text-gray-700">
+                        Balance (KES)
+                    </label>
+                    <div class="mt-1">
+                        <input id="balance" name="balance" type="number" value="123.45" disabled class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700">
+                        Amount
+                    </label>
+                    <div class="mt-1">
+                        <input id="amount" value="20" name="amount" type="number" placeholder="Enter amount to withdraw" min="1" max="123" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <button id="withdraw" type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Withdraw
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white text-gray-500">
+              Just dial *777#
+            </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let elarian;
+    let btn;
+    window.onload = () => {
+        btn = document.querySelector('#withdraw');
+        btn.disabled = true;
+
+        fetch('/login')
+            .then(async (resp) => {
+                if (!resp.ok) {
+                  throw new Error(`HTTP error! status: ${resp.status}`);
+                }
+                const data = await resp.json();
+                elarian = new Elarian({
+                    appId: 'banki-atm',
+                    orgId: data.orgId,
+                    authToken: data.token,
+                    allowNotifications: false,
+                });
+                elarian
+                    .on('error', () => { btn.disabled = true; })
+                    .on('closed', () => { btn.disabled = true; })
+                    .on('connected', () => {
+                        btn.disabled = false;
+                        btn.onclick = () => {
+                            const customer = new elarian.Customer({
+                                number: '+254718769882',
+                                provider: 'cellular'
+                            });
+                            customer.updateActivity(
+                                { number: 'banki-atm', channel: 'web' },
+                                {
+                                    key: 'UserWithdrew',
+                                    properties: { amount: document.querySelector('#amount').value },
+                                    sessionId: `${Date.now()}`,
+                                    createdAt: Date.now() / 1000
+                                }
+                            ).then(console.log).catch(console.error);
+                            return false;
+                        };
+                    })
+                    .connect()
+            })
+            .catch(console.error);
+    };
+</script>
+</body>
+</html>
