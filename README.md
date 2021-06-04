@@ -3,6 +3,13 @@
 >
 > Awesome Bank
 >
+> 
+
+## Usage
+
+```
+./gradlew run # watch out for environment variables :)
+```
 
 ## Features
 
