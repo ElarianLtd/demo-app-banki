@@ -14,7 +14,6 @@
 - State and Identity
     - Metadata
     - App Data
-    - Reminders
     - Auth Token
     - Activity
 
