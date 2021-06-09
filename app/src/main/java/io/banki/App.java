@@ -212,7 +212,7 @@ public class App {
                             .thenMany(Flux.fromIterable(activities).flatMap(it -> customer.updateActivity(activityChannel, it)))
                             .then(customer.sendMessage(smsChannel, new Message(new MessageBody(message))));
                 }).subscribe(
-                    it -> {},
+                    it -> log("Successfully processed sms response: " + it.status),
                     throwable -> log("Failed to process message: " + throwable.getMessage())
                 );
     };
