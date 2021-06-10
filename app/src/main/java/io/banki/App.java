@@ -170,7 +170,7 @@ public class App {
                                 break;
                             }
                             message = "On scale of 1 to 10, how likely are you to recommend Banki to friends or family (0 - not likely 10 - very likely?";
-                            activities.add(new Activity("UserStartedSurvey", new HashMap<>(), notification.messageId));
+                            activities.add(new Activity("UserStartedSurvey", new HashMap<>(), name + "svvv"));
 
                             data.put("surveystep", DataValue.of("likelihood"));
                             break;
@@ -183,7 +183,7 @@ public class App {
                             }
                             Map<String, String> props = new HashMap<>();
                             props.put("recommendationLikelihood", input);
-                            activities.add(new Activity("UserSurveyResponse", props, notification.messageId));
+                            activities.add(new Activity("UserSurveyResponse", props, name + "svvv"));
 
                             data.put("surveystep", DataValue.of("final"));
                             break;
@@ -191,8 +191,8 @@ public class App {
                             message = String.format("Thank %s you for your responses. We have deposited KES 100 in your account as reward.", name);
                             Map<String, String> activityProps = new HashMap<>();
                             activityProps.put("recommendationReason", input);
-                            activities.add(new Activity("UserSurveyResponse", activityProps, notification.messageId));
-                            activities.add(new Activity("UserCompletedSurvey", new HashMap<>(), notification.messageId));
+                            activities.add(new Activity("UserSurveyResponse", activityProps, name + "svvv"));
+                            activities.add(new Activity("UserCompletedSurvey", new HashMap<>(), name + "svvv"));
 
                             // coreBanking.deposit(100)
 
@@ -210,7 +210,7 @@ public class App {
 
                     return updateMetadata
                             .thenMany(Flux.fromIterable(activities).flatMap(it -> customer.updateActivity(activityChannel, it)))
-                            .then(customer.sendMessage(smsChannel, new Message(new MessageBody(message))));
+                            .then(customer.replyToMessage(notification.messageId, new Message(new MessageBody(message))));
                 }).subscribe(
                     it -> log("Successfully processed sms response: " + it.status),
                     throwable -> log("Failed to process message: " + throwable.getMessage())
@@ -241,9 +241,10 @@ public class App {
         });
 
         Gson gson = new Gson();
-        staticFiles.location("/static");
 
         port(portNumber);
+
+        staticFiles.location("/static");
         get("/login", (req, res) -> {
             HashMap<String, String> data = new HashMap<>();
             data.put("token", elarian.generateAuthToken().block().token);
