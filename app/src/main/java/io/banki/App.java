@@ -35,7 +35,7 @@ public class App {
                     String step = appData == null ? "home" : appData.string;
                     String name = nameVal != null ? nameVal.string : null;
                     String state = name == null ? "unregisteredUser" : "registeredUser";
-                    String input = notification.input;
+                    String input = notification.input.text;
 
                     Map<String, DataValue> metaUpdate = new HashMap<>();
                     UssdMenu menu = new UssdMenu("Welcome to Banki", false);
@@ -212,7 +212,7 @@ public class App {
                             .thenMany(Flux.fromIterable(activities).flatMap(it -> customer.updateActivity(activityChannel, it)))
                             .then(customer.replyToMessage(notification.messageId, new Message(new MessageBody(message))));
                 }).subscribe(
-                    it -> log("Successfully processed sms response: " + it.status),
+                    it -> log("Successfully processed sms response: " + it.status + ": " + it.description),
                     throwable -> log("Failed to process message: " + throwable.getMessage())
                 );
     };
