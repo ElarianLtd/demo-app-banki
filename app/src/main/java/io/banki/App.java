@@ -28,6 +28,42 @@ public class App {
         System.out.println(message);
     }
 
+    public static void main(String[] args) {
+        elarian.setOnReceivedSmsNotificationHandler(smsHandler);
+        elarian.setOnUssdSessionNotificationHandler(ussdHandler);
+        elarian.connect(new ConnectionListener() {
+            @Override
+            public void onPending() {}
+
+            @Override
+            public void onConnecting() {}
+
+            @Override
+            public void onClosed() { }
+
+            @Override
+            public void onConnected() { log(String.format("App is running! Dial %s to get started!", ussdCode)); }
+
+            @Override
+            public void onError(Throwable throwable) {
+                throwable.printStackTrace();
+                stop();
+            }
+        });
+
+        Gson gson = new Gson();
+
+        port(portNumber);
+
+        staticFiles.location("/static");
+        get("/login", (req, res) -> {
+            HashMap<String, String> data = new HashMap<>();
+            data.put("token", elarian.generateAuthToken().block().token);
+            data.put("orgId", System.getenv("ORG_ID"));
+            return data;
+        }, gson::toJson);
+    }
+
     private static final BaseNotificationHandler<UssdSessionNotification, UssdMenu> ussdHandler = (notification, customer, appData, responder) -> {
         customer.getMetadata()
                 .flatMap(metadata -> {
@@ -216,40 +252,4 @@ public class App {
                     throwable -> log("Failed to process message: " + throwable.getMessage())
                 );
     };
-
-    public static void main(String[] args) {
-        elarian.setOnReceivedSmsNotificationHandler(smsHandler);
-        elarian.setOnUssdSessionNotificationHandler(ussdHandler);
-        elarian.connect(new ConnectionListener() {
-            @Override
-            public void onPending() {}
-
-            @Override
-            public void onConnecting() {}
-
-            @Override
-            public void onClosed() { }
-
-            @Override
-            public void onConnected() { log(String.format("App is running! Dial %s to get started!", ussdCode)); }
-
-            @Override
-            public void onError(Throwable throwable) {
-                throwable.printStackTrace();
-                stop();
-            }
-        });
-
-        Gson gson = new Gson();
-
-        port(portNumber);
-
-        staticFiles.location("/static");
-        get("/login", (req, res) -> {
-            HashMap<String, String> data = new HashMap<>();
-            data.put("token", elarian.generateAuthToken().block().token);
-            data.put("orgId", System.getenv("ORG_ID"));
-            return data;
-        }, gson::toJson);
-    }
 }
