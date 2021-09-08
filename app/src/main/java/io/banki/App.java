@@ -14,13 +14,11 @@ public class App {
     private static final int portNumber ;
     private static final String ussdCode;
     private static final MessagingChannel smsChannel;
-    private static final ActivityChannel activityChannel;
 
     static {
         portNumber = 3000;
         ussdCode = System.getenv("USSD_CODE");
         smsChannel = new MessagingChannel(System.getenv("SMS_SHORT_CODE"), MessagingChannel.Channel.SMS);
-        activityChannel = new ActivityChannel(System.getenv("APP_ID"), ActivityChannel.Channel.WEB);
         elarian = new Elarian(System.getenv("API_KEY"), System.getenv("ORG_ID"), System.getenv("APP_ID"));
     }
 
@@ -172,7 +170,7 @@ public class App {
                     responder.callback(menu, DataValue.of(step));
 
                     Mono<MessageReply> sendMessage = message == null ? Mono.empty() : customer.sendMessage(smsChannel, new Message(new MessageBody(message)));
-                    Flux<CustomerStateUpdateReply> updateActivity = Flux.fromIterable(activities).flatMap(it -> customer.updateActivity(activityChannel, it));
+                    Flux<CustomerStateUpdateReply> updateActivity = Flux.fromIterable(activities).flatMap(it -> customer.updateActivity(System.getenv("APP_ID"), it));
                     Flux<CustomerStateUpdateReply> engage = sendMessage.thenMany(updateActivity);
                     if (metaUpdate.size() > 0) {
                         return engage
@@ -245,7 +243,7 @@ public class App {
                     Mono<CustomerStateUpdateReply> updateMetadata = data.size() > 0 ? customer.updateMetadata(data) : Mono.empty();
 
                     return updateMetadata
-                            .thenMany(Flux.fromIterable(activities).flatMap(it -> customer.updateActivity(activityChannel, it)))
+                            .thenMany(Flux.fromIterable(activities).flatMap(it -> customer.updateActivity(System.getenv("APP_ID"), it)))
                             .then(customer.replyToMessage(notification.messageId, new Message(new MessageBody(message))));
                 }).subscribe(
                     it -> log("Successfully processed sms response: " + it.status + ": " + it.description),

@@ -6,3 +6,8 @@ build
 out/
 .idea/
 .vscode/
+.DS_Store
+.project
+.settings/
+app/.project
+app/.classpath
