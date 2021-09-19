@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.elarian:elarian-core:0.2.11'
+    implementation 'com.elarian:elarian-core:0.2.13'
     implementation 'com.sparkjava:spark-core:2.9.3'
     implementation 'com.google.code.gson:gson:2.8.7'
     // Use JUnit test framework.

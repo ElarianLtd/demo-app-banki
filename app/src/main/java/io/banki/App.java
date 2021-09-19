@@ -62,7 +62,7 @@ public class App {
         }, gson::toJson);
     }
 
-    private static final BaseNotificationHandler<UssdSessionNotification, UssdMenu> ussdHandler = (notification, customer, appData, responder) -> {
+    private static final UssdSessionNotificationHandler ussdHandler = (notification, customer, appData, responder) -> {
         customer.getMetadata()
                 .flatMap(metadata -> {
                     DataValue nameVal = metadata.get("name");
